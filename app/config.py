@@ -3,8 +3,12 @@ from functools import lru_cache
 
 
 class Settings(BaseSettings):
-    app_name: str = ''
-    sqlalchemy_base_url: str = ''
+    app_name: str
+    sqlalchemy_base_url: str
+    sqlalchemy_check_same_thread: bool
+    sqlalchemy_expire_on_commit: bool
+    sqlalchemy_autocommit: bool
+    sqlalchemy_autoflush: bool
 
     class Config:
         env_file = '../.env'
@@ -12,4 +16,4 @@ class Settings(BaseSettings):
 
 @lru_cache()
 def get_settings() -> Settings:
-    return Settings()
+    return Settings()   # type: ignore
