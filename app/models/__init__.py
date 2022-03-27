@@ -1,3 +1,2 @@
+from . import users
 from ..db.db import Base
-
-_base = Base()
