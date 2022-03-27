@@ -18,4 +18,6 @@ app.include_router(api)
 @app.on_event('startup')
 async def startup():
     async with engine.begin() as conn:
+        if settings.drop_all_tables_on_startup:
+            await conn.run_sync(models.Base.metadata.drop_all)
         await conn.run_sync(models.Base.metadata.create_all)

@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     sqlalchemy_expire_on_commit: bool
     sqlalchemy_autocommit: bool
     sqlalchemy_autoflush: bool
+    drop_all_tables_on_startup: bool
 
     class Config:
         env_file = '../.env'
