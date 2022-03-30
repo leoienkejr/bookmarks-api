@@ -1,2 +1,2 @@
-from . import users
+from . import user
 from ..db.db import Base
