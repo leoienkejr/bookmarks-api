@@ -3,13 +3,13 @@ from functools import lru_cache
 
 
 class Settings(BaseSettings):
-    app_name: str
-    sqlalchemy_base_url: str
-    sqlalchemy_check_same_thread: bool
-    sqlalchemy_expire_on_commit: bool
-    sqlalchemy_autocommit: bool
-    sqlalchemy_autoflush: bool
-    drop_all_tables_on_startup: bool
+    app_name: str | None
+    sqlalchemy_base_url: str | None
+    sqlalchemy_check_same_thread: bool | None
+    sqlalchemy_expire_on_commit: bool | None
+    sqlalchemy_autocommit: bool | None
+    sqlalchemy_autoflush: bool | None
+    drop_all_tables_on_startup: bool | None
 
     class Config:
         env_file = '../.env'
