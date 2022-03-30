@@ -2,3 +2,6 @@
 *.python-version
 *.mypy_cache
 *.vscode
+*.env
+*.db
+__pycache__/
