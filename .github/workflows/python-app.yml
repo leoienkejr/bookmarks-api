@@ -34,4 +34,5 @@ jobs:
     - name: Test with pytest
       run: |
         mv .env.txt .env
-        pytest --asyncio-mode='auto' ./app
+        cd app
+        pytest --asyncio-mode='auto'
