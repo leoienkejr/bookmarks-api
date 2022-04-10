@@ -1,7 +1,7 @@
 from ..db.db import SessionLocal
 
 
-def get_session():
+async def get_session():
     '''
     Database session generator
     '''
@@ -11,4 +11,4 @@ def get_session():
     try:
         yield session
     finally:
-        session.close()
+        await session.close()
