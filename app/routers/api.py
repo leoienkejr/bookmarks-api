@@ -1,9 +1,9 @@
 from fastapi import APIRouter
-from .users import v1_users
+from .user import v1_user
 
 api = APIRouter(prefix='/api')
 
 v1 = APIRouter(prefix='/v1')
-v1.include_router(v1_users)
+v1.include_router(v1_user)
 
 api.include_router(v1)
