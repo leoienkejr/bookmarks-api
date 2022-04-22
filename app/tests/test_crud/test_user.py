@@ -1,7 +1,6 @@
 import pytest
-from unittest.mock import Mock
-from ...crud.user import create_user
-from ...models.user import User
+from unittest.mock import Mock, patch
+from ...crud import user
 
 pytest_plugins = ('pytest_asyncio')
 
@@ -25,7 +24,8 @@ def fake_hash_password(password: str) -> str:
 
 
 @pytest.mark.asyncio
-async def test_create_user():
+@patch('app.crud.user.User')
+async def test_create_user(mock_user_obj):
     '''
     Test the succesful creation of users with the create_user function
     '''
@@ -34,10 +34,8 @@ async def test_create_user():
     email = 'a@email.com'
     password = '123'
 
-    result = await create_user(db=db, email=email, password=password, hash_func=fake_hash_password)
+    result = await user.create_user(db=db, email=email, password=password, hash_func=fake_hash_password)
 
-    assert result.hashed_password == fake_hash_password(password)
-    assert isinstance(result, User)
-    assert result.email == email
+    mock_user_obj.assert_called_with(email=email, hashed_password=fake_hash_password(password))
     assert db._flush_calls == 1
     assert result.id == 1
