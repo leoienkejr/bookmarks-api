@@ -120,7 +120,7 @@ def has_special_character(password: str):
 
         return password
 
-    raise ValueError('Password does not have any special characaters.')
+    raise ValueError('Password must have at least one special characater.')
 
 
 def validate(password: str):
