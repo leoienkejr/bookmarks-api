@@ -35,4 +35,9 @@ jobs:
       run: |
         mv .env.txt .env
         cd app
-        pytest --asyncio-mode='auto'
+        pytest --asyncio-mode='auto' --cov=. --cov-report=xml
+    - name: Upload coverage report to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        files: app/coverage.xml
+        verbose: true
