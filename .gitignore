@@ -4,4 +4,6 @@
 *.vscode
 *.env
 *.db
+coverage.*
+.coverage
 __pycache__/
