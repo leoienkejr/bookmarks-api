@@ -7,11 +7,11 @@ from ..schemas.user import UserCreate, UserRead
 from ..schemas.application_error import ApplicationErrorResponse
 from ..exceptions.exceptions import EmailAlreadyInUseError
 
-v1_user = APIRouter(prefix='/users')
+v1_users = APIRouter(prefix='/users')
 
 
-@v1_user.post('/', tags=['users'], response_model=UserRead, status_code=201,
-              responses={400: {'model': ApplicationErrorResponse}})
+@v1_users.post('/', tags=['users'], response_model=UserRead, status_code=201,
+               responses={400: {'model': ApplicationErrorResponse}})
 async def create_new_user(user: UserCreate, db: AsyncSession = Depends(get_session)):
     async with db as db:
         async with db.begin():
