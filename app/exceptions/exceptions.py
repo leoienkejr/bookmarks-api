@@ -31,7 +31,19 @@ class ApplicationError(Exception):
 EmailAlreadyInUseError = ApplicationError(error_code=1, error_str='EMAIL_ALREADY_IN_USE',
                                           http_status=400, message='Email address already in use')
 
+InvalidCredentialsError = ApplicationError(error_code=2, error_str='INVALID_CREDENTIALS',
+                                           http_status=403, message='Credentials are invalid or incorrect')
+
+ExpiredRefreshTokenError = ApplicationError(error_code=3, error_str='EXPIRED_REFRESH_TOKEN',
+                                            http_status=403, message='Refresh token is expired')
+
+ExpiredAuthTokenError = ApplicationError(error_code=4, error_str='EXPIRED_AUTH_TOKEN',
+                                         http_status=403, message='Authentication token is expired')
+
 
 exceptions_by_error_code = {
-    1: EmailAlreadyInUseError
+    1: EmailAlreadyInUseError,
+    2: InvalidCredentialsError,
+    3: ExpiredRefreshTokenError,
+    4: ExpiredAuthTokenError
 }
