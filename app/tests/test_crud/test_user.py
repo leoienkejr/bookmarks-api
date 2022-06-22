@@ -36,6 +36,7 @@ async def test_create_user(mock_user_obj):
 
     result = await user.create_user(db=db, email=email, password=password, hash_func=fake_hash_password)
 
-    mock_user_obj.assert_called_with(email=email, hashed_password=fake_hash_password(password))
+    mock_user_obj.assert_called_with(
+        email=email, hashed_password=fake_hash_password(password))
     assert db._flush_calls == 1
     assert result.id == 1
