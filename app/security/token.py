@@ -1,16 +1,25 @@
 from datetime import datetime, timezone
 from typing import Callable
+from dataclasses import dataclass, field
 
-TOKEN_TEMPLATE = {
-    'iat': -1,
-    'exp': -1,
-    'iss': 'bookmarks-api',
-    'id': -1,
-    'type': ''
-}
 
-REFRESH_TOKEN_EXPIRE_TIME_IN_SECONDS = 60 * 24 * 60
-ACCESS_TOKEN_EXPIRE_TIME_IN_SECONDS = 30 * 60
+@dataclass
+class TokenPreset:
+    """ Holds parameters to configure the generation of
+    a token
+
+    """
+
+    token_type: str
+    time_to_expire_in_seconds: int
+
+    uid: int | None = field(default=None)
+
+
+refresh_token_preset = TokenPreset(
+    token_type='refresh', time_to_expire_in_seconds=60 * 60 * 24)
+access_token_preset = TokenPreset(
+    token_type='access', time_to_expire_in_seconds=30 * 60)
 
 
 class TokenSerializerAdapter:
@@ -55,31 +64,30 @@ class TokenSerializerAdapter:
         return self.__serializer(*args, **self.__kwargs)
 
 
-def generate_refresh_token(id: int, serializer: TokenSerializerAdapter):
-    """_summary_
+def build_token_from_preset_and_serialize(preset: TokenPreset, serializer: TokenSerializerAdapter):
+    """ Builds a token from a preset and the serializes it with the
+    given serializer, returning the result.
 
-    :param id: _description_
-    :return: _description_
+    :param preset: TokenPreset object containing parameters to generate the token
+    :param serializer: TokenSerializerAdapter object, containing the serializer callable
+    and arguments to be used to serialize the token.
+
+    :return: Serialized token
     """
 
     iat = datetime.now(timezone.utc).timestamp()
 
-    token = TOKEN_TEMPLATE
+    token = {
+        'iat': -1,
+        'exp': -1,
+        'iss': 'bookmarks-api',
+        'uid': -1,
+        'type': ''
+    }
+
     token['iat'] = iat
-    token['exp'] = iat + REFRESH_TOKEN_EXPIRE_TIME_IN_SECONDS
-    token['id'] = id
-    token['type'] = 'refresh'
-
-    return token
-
-
-def generate_access_token(id: int, serializer: TokenSerializerAdapter):
-    iat = datetime.now(timezone.utc).timestamp()
-
-    token = TOKEN_TEMPLATE
-    token['iat'] = iat
-    token['exp'] = iat + ACCESS_TOKEN_EXPIRE_TIME_IN_SECONDS
-    token['id'] = id
-    token['type'] = 'access'
+    token['exp'] = iat + preset.time_to_expire_in_seconds
+    token['uid'] = preset.uid
+    token['type'] = preset.token_type
 
     return serializer.serialize(token)
