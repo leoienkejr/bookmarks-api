@@ -9,6 +9,7 @@ black==22.3.0
 cffi==1.15.0
 click==8.0.4
 coverage==6.4.1
+cryptography==37.0.4
 dnspython==2.2.1
 ecdsa==0.17.0
 email-validator==1.1.3
