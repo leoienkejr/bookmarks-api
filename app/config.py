@@ -10,6 +10,11 @@ class Settings(BaseSettings):
     sqlalchemy_autocommit: bool
     sqlalchemy_autoflush: bool
     drop_all_tables_on_startup: bool
+    jwt_signature_secret: str
+    jwt_encryption_secret: str
+    jws_algo: str
+    jwe_algo: str
+    jwe_encryption: str
 
     class Config:
         env_file = '../.env'
