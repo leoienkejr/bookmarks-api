@@ -6,7 +6,8 @@ from ..schemas.user import UserCreate
 from ..dependencies.get_session import get_session
 from ..exceptions.exceptions import InvalidCredentialsError
 from ..security.hash import verify_password
-from ..security.token import generate_access_token, generate_refresh_token
+from ..security.token import (build_token_from_preset_and_serialize,
+                              refresh_token_preset, full_jwt_serializer)
 
 
 APPLICATION_ERROR_RESPONSE = {'model': ApplicationErrorResponse}
@@ -32,7 +33,9 @@ async def signin(user: UserCreate, db: AsyncSession = Depends(get_session)):
             found_user = await get_user_by_email(email=user.email, db=db)
 
             if found_user is not None and verify_password(user.password, str(found_user.hashed_password)):
-                return generate_refresh_token(int(found_user.id))
+                token = refresh_token_preset
+                token.uid = int(found_user.id)  # type: ignore
+                return build_token_from_preset_and_serialize(token, full_jwt_serializer)
 
             else:
                 raise InvalidCredentialsError

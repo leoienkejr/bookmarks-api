@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 from typing import Callable
 from dataclasses import dataclass, field
+from jose import jws, jwe
+from ..config import get_settings
 
 
 @dataclass
@@ -58,10 +60,28 @@ class TokenSerializerAdapter:
         :return: Return value of the call to the serializer
         """
 
-        args = self.__args
+        args = self.__args.copy()
         args.insert(self.token_position_in_serializer_args, token)
 
         return self.__serializer(*args, **self.__kwargs)
+
+
+jws_serializer = TokenSerializerAdapter(
+    jws.sign, args=[get_settings().jwt_signature_secret], kwargs={'algorithm': get_settings().jws_algo})
+
+jwe_serializer = TokenSerializerAdapter(jwe.encrypt, args=[get_settings().jwt_encryption_secret], kwargs={
+    'algorithm': get_settings().jwe_algo,
+    'encryption': get_settings().jwe_encryption
+})
+
+
+def generate_signed_and_encrypted_jwt(token: dict) -> str:
+    return jwe_serializer.serialize(
+        jws_serializer.serialize(token)
+    )
+
+
+full_jwt_serializer = TokenSerializerAdapter(generate_signed_and_encrypted_jwt)
 
 
 def build_token_from_preset_and_serialize(preset: TokenPreset, serializer: TokenSerializerAdapter):
