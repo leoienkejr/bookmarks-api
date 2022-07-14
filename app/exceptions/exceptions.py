@@ -40,10 +40,14 @@ ExpiredRefreshTokenError = ApplicationError(error_code=3, error_str='EXPIRED_REF
 ExpiredAuthTokenError = ApplicationError(error_code=4, error_str='EXPIRED_AUTH_TOKEN',
                                          http_status=403, message='Authentication token is expired')
 
+InvalidTokenError = ApplicationError(error_code=5, error_str='INVALID_TOKEN', http_status=403,
+                                     message='Unable to verify authenticity of the token')
+
 
 exceptions_by_error_code = {
     1: EmailAlreadyInUseError,
     2: InvalidCredentialsError,
     3: ExpiredRefreshTokenError,
-    4: ExpiredAuthTokenError
+    4: ExpiredAuthTokenError,
+    5: InvalidTokenError
 }
