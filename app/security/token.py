@@ -49,9 +49,9 @@ class TokenProcessorAdapter:
         :param args: Positional arguments to be passed to the processor
         :param kwargs: Keyword arguments to be passes to the processor
         """
-        self.__processor = processor
-        self.__args = args if args is not None else []
-        self.__kwargs = kwargs if kwargs is not None else {}
+        self.processor = processor
+        self.args = args if args is not None else []
+        self.kwargs = kwargs if kwargs is not None else {}
 
         self.token_position_in_processor_args = 0
 
@@ -62,10 +62,10 @@ class TokenProcessorAdapter:
         :return: Return value of the call to the processor
         """
 
-        args = self.__args.copy()
+        args = self.args.copy()
         args.insert(self.token_position_in_processor_args, token)
 
-        return self.__processor(*args, **self.__kwargs)
+        return self.processor(*args, **self.kwargs)
 
 
 jws_serializer = TokenProcessorAdapter(
