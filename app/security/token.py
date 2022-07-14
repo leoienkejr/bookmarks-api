@@ -1,8 +1,10 @@
+import json
 from datetime import datetime, timezone
 from typing import Callable
 from dataclasses import dataclass, field
 from jose import jws, jwe
 from app.config import get_settings
+from app.exceptions.exceptions import InvalidTokenError
 
 
 @dataclass
@@ -74,6 +76,23 @@ jwe_serializer = TokenProcessorAdapter(jwe.encrypt, args=[get_settings().jwt_enc
     'encryption': get_settings().jwe_encryption
 })
 
+jwe_decrypter = TokenProcessorAdapter(
+    jwe.decrypt, args=[get_settings().jwt_encryption_secret])
+
+jws_signature_verifier = TokenProcessorAdapter(
+    jws.verify, args=[get_settings().jwt_signature_secret], kwargs={'algorithms': [get_settings().jws_algo]})
+
+
+def parse_json_jwt(jwt: str | bytes) -> dict:
+    try:
+        jwt = json.loads(jwt)
+        return jwt  # type: ignore
+    except json.JSONDecodeError:
+        raise InvalidTokenError
+
+
+json_jwt_parser = TokenProcessorAdapter(parse_json_jwt)
+
 
 def generate_signed_and_encrypted_jwt(token: dict) -> str:
     return jwe_serializer.process(
@@ -81,7 +100,15 @@ def generate_signed_and_encrypted_jwt(token: dict) -> str:
     )
 
 
+def decrypt_verify_and_parse_json_jwt(token: str) -> str:
+    return json_jwt_parser.process(jws_signature_verifier.process(
+        jwe_decrypter.process(token)
+    ))
+
+
 full_jwt_serializer = TokenProcessorAdapter(generate_signed_and_encrypted_jwt)
+full_jwt_deserializer = TokenProcessorAdapter(
+    decrypt_verify_and_parse_json_jwt)
 
 
 def build_token_from_preset_and_serialize(preset: TokenPreset, serializer: TokenProcessorAdapter):
