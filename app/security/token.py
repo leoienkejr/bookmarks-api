@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from typing import Callable
 from dataclasses import dataclass, field
 from jose import jws, jwe
-from ..config import get_settings
+from app.config import get_settings
 
 
 @dataclass
@@ -24,67 +24,67 @@ access_token_preset = TokenPreset(
     token_type='access', time_to_expire_in_seconds=30 * 60)
 
 
-class TokenSerializerAdapter:
-    """ This adapts callable token serializers
+class TokenProcessorAdapter:
+    """ This adapts callable token serializers/deserializers
     to a standard interface. It's purpose is to allow the token
-    generation functions to be used with different  serializers
-    without changes to their logic.
+    generation and validation functions to be used with different
+    processors without changes to their logic.
 
-    The adapter makes the following assumptions about the serializer:
+    The adapter makes the following assumptions about the processor:
      - It is a callable
-     - It receives the token to be serialized as a positional argument
+     - It receives the token to be processed as a positional argument
 
-    The attribute 'token_position_in_serializer_args' determines the position
+    The attribute 'token_position_in_processor_args' determines the position
     where the token will be inserted in the arguments list which will be passed
-    to the serializer. The default is the first position.
+    to the processor. The default is the first position.
     """
 
-    def __init__(self, serializer: Callable, args: list | None = None,
+    def __init__(self, processor: Callable, args: list | None = None,
                  kwargs: dict | None = None):
         """
 
-        :param serializer: Serializer callable
-        :param args: Positional arguments to be passed to the serializer
-        :param kwargs: Keyword arguments to be passes to the serializer
+        :param processor: Processor callable
+        :param args: Positional arguments to be passed to the processor
+        :param kwargs: Keyword arguments to be passes to the processor
         """
-        self.__serializer = serializer
+        self.__processor = processor
         self.__args = args if args is not None else []
         self.__kwargs = kwargs if kwargs is not None else {}
 
-        self.token_position_in_serializer_args = 0
+        self.token_position_in_processor_args = 0
 
-    def serialize(self, token: dict | str):
-        """ Call the serializer with the given arguments and token
+    def process(self, token: dict | str):
+        """ Call the processor with the given arguments and token
 
-        :param token: Token to be serialized
-        :return: Return value of the call to the serializer
+        :param token: Token to be processed
+        :return: Return value of the call to the processor
         """
 
         args = self.__args.copy()
-        args.insert(self.token_position_in_serializer_args, token)
+        args.insert(self.token_position_in_processor_args, token)
 
-        return self.__serializer(*args, **self.__kwargs)
+        return self.__processor(*args, **self.__kwargs)
 
 
-jws_serializer = TokenSerializerAdapter(
+jws_serializer = TokenProcessorAdapter(
     jws.sign, args=[get_settings().jwt_signature_secret], kwargs={'algorithm': get_settings().jws_algo})
 
-jwe_serializer = TokenSerializerAdapter(jwe.encrypt, args=[get_settings().jwt_encryption_secret], kwargs={
+jwe_serializer = TokenProcessorAdapter(jwe.encrypt, args=[get_settings().jwt_encryption_secret], kwargs={
     'algorithm': get_settings().jwe_algo,
     'encryption': get_settings().jwe_encryption
 })
 
 
 def generate_signed_and_encrypted_jwt(token: dict) -> str:
-    return jwe_serializer.serialize(
-        jws_serializer.serialize(token)
+    return jwe_serializer.process(
+        jws_serializer.process(token)
     )
 
 
-full_jwt_serializer = TokenSerializerAdapter(generate_signed_and_encrypted_jwt)
+full_jwt_serializer = TokenProcessorAdapter(generate_signed_and_encrypted_jwt)
 
 
-def build_token_from_preset_and_serialize(preset: TokenPreset, serializer: TokenSerializerAdapter):
+def build_token_from_preset_and_serialize(preset: TokenPreset, serializer: TokenProcessorAdapter):
     """ Builds a token from a preset and the serializes it with the
     given serializer, returning the result.
 
@@ -110,4 +110,4 @@ def build_token_from_preset_and_serialize(preset: TokenPreset, serializer: Token
     token['uid'] = preset.uid
     token['type'] = preset.token_type
 
-    return serializer.serialize(token)
+    return serializer.process(token)
